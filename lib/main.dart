@@ -38,7 +38,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: FutureBuilder(
+        home:
+        FutureBuilder(
             future: userSignedIn(),
             builder: (context,AsyncSnapshot<Widget> snapshot){
               if(snapshot.hasData){
