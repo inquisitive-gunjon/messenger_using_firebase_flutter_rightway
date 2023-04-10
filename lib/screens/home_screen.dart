@@ -24,6 +24,36 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text('Quick Chat App'),
+            ),
+            ListTile(
+              title: const Text('Log Out'),
+              onTap: () async  {
+                await GoogleSignIn().signOut();
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>AuthScreen()), (route) => false);
+              },
+            ),
+
+          ],
+        ),
+      ),
+
+
       appBar: AppBar(
         title: Text(' Quick Chat'),
         backgroundColor: Colors.teal,
