@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../main.dart';
+import '../reusable_widget/reusable_appbtn_style.dart';
+import '../reusable_widget/reusable_appinput_decoration.dart';
+
 
 
 class AuthScreen extends StatefulWidget {
@@ -50,47 +53,96 @@ class _AuthScreenState extends State<AuthScreen> {
     }
 
    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>MyApp()), (route) => false);
-   
+
 
   }
+
+
+  /// this is for email and password sign in and sign up
+
+  final _formkey = GlobalKey<FormState>();
+  String? _email;
+  String? _password;
+  String errMsg = '';
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage("https://cdn.iconscout.com/icon/free/png-256/chat-2639493-2187526.png")
-                  )
-                ),
+      body: Form(
+        key: _formkey,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Flutter Chat App",style: TextStyle(fontSize: 30,fontWeight: FontWeight.bold),),
+
+              SizedBox(height: 30,),
+
+              TextFormField(
+                keyboardType: TextInputType.emailAddress,
+                validator: (value){
+                  if(value==null || value.isEmpty){
+                    return 'This filed must not be empty';
+                  }
+                  return null;
+                },
+                decoration:  reusableAppInputDecoration('Email'),
+                onSaved: (value){
+                  _email = value;
+                },
+
+
               ),
-            ),
-            Text("Flutter Chat App",style: TextStyle(fontSize: 36,fontWeight: FontWeight.bold),),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 20),
-              child: ElevatedButton(onPressed: ()async{
+              const SizedBox(height: 10,),
+              TextFormField(
+                obscureText: true,
+                validator: (value){
+                  if(value==null || value.isEmpty){
+                    return 'This filed must not be empty';
+                  }
+                  return null;
+                },
+                decoration: reusableAppInputDecoration('password'),
+
+                onSaved: (value){
+                  _password = value;
+                },
+
+
+              ),
+
+              const SizedBox(height: 30,),
+
+              ElevatedButton(onPressed: ()async{
+
+              },style: appButtonStyle(), child: const Text('Login')
+
+              ),
+
+              ElevatedButton(onPressed: ()async{
                   await signInFunction();
-              }, child: Row(
+              },style: appButtonStyle(),
+                child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.network('https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-webinar-optimizing-for-success-google-business-webinar-13.png',height: 36,),
-                  SizedBox(width: 10,),
-                  Text("Sign in With Google",style: TextStyle(fontSize: 20),)
+                  const SizedBox(width: 10,),
+                  const Text("Sign in With Google",style: TextStyle(fontSize: 20),)
                 ],
-              ),style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all(Colors.black),
-                padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 12))
               ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-      
+
     );
   }
+
+
+
+
 }
