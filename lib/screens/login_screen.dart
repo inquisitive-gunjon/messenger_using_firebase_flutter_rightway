@@ -3,14 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
+import 'package:simple_chatapp/screens/chat_screen.dart';
+import 'package:simple_chatapp/screens/registration_screen.dart';
 
+import '../auth/auth_services.dart';
 import '../main.dart';
+import '../models/user_model.dart';
+import '../providers/user_provider.dart';
 import '../reusable_widget/reusable_appbtn_style.dart';
 import '../reusable_widget/reusable_appinput_decoration.dart';
 
 
 
 class AuthScreen extends StatefulWidget {
+
 
   @override
   _AuthScreenState createState() => _AuthScreenState();
@@ -19,6 +26,8 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
 
   //sign in with google with firebase.........
+
+
 
   GoogleSignIn googleSignIn = GoogleSignIn();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -61,10 +70,22 @@ class _AuthScreenState extends State<AuthScreen> {
   /// this is for email and password sign in and sign up
 
   final _formkey = GlobalKey<FormState>();
-  String? _email;
-  String? _password;
-  String errMsg = '';
+  final _emailContoller = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _imageController = TextEditingController();
+  bool _obscureText = true;
+  String _errMsg = '';
+  bool isLogin = true;
+  Timestamp? Datetime;
 
+  void dispose() {
+    _emailContoller.dispose();
+    _passwordController.dispose();
+    _nameController.dispose();
+    _imageController.dispose();
+    super.dispose();
+  }
 
 
   @override
@@ -82,6 +103,7 @@ class _AuthScreenState extends State<AuthScreen> {
               SizedBox(height: 30,),
 
               TextFormField(
+                controller: _emailContoller,
                 keyboardType: TextInputType.emailAddress,
                 validator: (value){
                   if(value==null || value.isEmpty){
@@ -90,14 +112,13 @@ class _AuthScreenState extends State<AuthScreen> {
                   return null;
                 },
                 decoration:  reusableAppInputDecoration('Email'),
-                onSaved: (value){
-                  _email = value;
-                },
+
 
 
               ),
               const SizedBox(height: 10,),
               TextFormField(
+                controller: _passwordController,
                 obscureText: true,
                 validator: (value){
                   if(value==null || value.isEmpty){
@@ -107,33 +128,54 @@ class _AuthScreenState extends State<AuthScreen> {
                 },
                 decoration: reusableAppInputDecoration('password'),
 
-                onSaved: (value){
-                  _password = value;
-                },
+
 
 
               ),
 
               const SizedBox(height: 30,),
 
-              ElevatedButton(onPressed: ()async{
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: appButtonStyle(),
+                    onPressed:(){
+                      isLogin = true;
+                      _loginUser();
 
-              },style: appButtonStyle(), child: const Text('Login')
-
+                    },
+                    child: Text('Login',style: TextStyle(fontSize: 20),)),
               ),
 
-              ElevatedButton(onPressed: ()async{
-                  await signInFunction();
-              },style: appButtonStyle(),
-                child: Row(
+              const SizedBox(height: 20,),
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.network('https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-webinar-optimizing-for-success-google-business-webinar-13.png',height: 36,),
-                  const SizedBox(width: 10,),
-                  const Text("Sign in With Google",style: TextStyle(fontSize: 20),)
+                  Text('New User ?'),
+                  TextButton(
+                      onPressed: (){
+                         isLogin = false;
+                        // _loginUser();
+
+                      },
+                      child: Text('Register',style: TextStyle(fontSize: 18),)),
                 ],
               ),
+              Text(''),
+
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton(
+                    style: appButtonStyle(),
+                    onPressed:() async{
+                      await signInFunction();
+
+                    },
+                    child: Text('Sign in with google',style: TextStyle(fontSize: 20),)),
               ),
+
             ],
           ),
         ),
@@ -142,7 +184,46 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
+  void _loginUser() async {
 
+    if(_formkey.currentState!.validate()){
+      //er dara bujasse jodi empty na thake,user kiso type krse kina
+      try{
+        User? user;
+        //er dara bujasse user login button a press krse
+        if(isLogin){
+          //login krok or regester korok user er modde kiso ekta akhon dokbe
+          user = await  AuthServices.loginUser(_emailContoller.text, _passwordController.text);
+        }
+        else{
+          user = await AuthServices.registerUser(_emailContoller.text, _passwordController.text);
+
+        }
+        // user er modde akhon kiso na kiso dokse, tobe jawar age user er information golo niye database a save kore rakhbo
+        if(user != null) {
+          //todo create user and insert to db
+          if(!isLogin) {
+            final userModel = UserModel(
+                email: user.email!,
+                 uid: user.uid,
+            );
+            Provider.of<UserProvider>(context, listen: false)
+                .addUser(userModel).then((value) {
+              Navigator.push(context, MaterialPageRoute(builder: (context)=> MyApp()));
+            });
+          }
+        }
+
+      } on FirebaseAuthException catch (error) {
+        setState(() {
+          _errMsg = error.message!;
+        });
+      }
+
+    }
+
+
+  }
 
 
 }

@@ -8,8 +8,9 @@ import 'package:simple_chatapp/screens/all_friends.dart';
 import 'package:simple_chatapp/screens/search_screen.dart';
 
 import '../models/user_model.dart';
-import 'auth_screen.dart';
+
 import 'chat_screen.dart';
+import 'login_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -68,12 +69,18 @@ class _HomeScreenState extends State<HomeScreen> {
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('users').doc(widget.user.uid).collection('messages').snapshots(),
         builder: (context,AsyncSnapshot snapshot){
-          if(snapshot.hasData){
+          if(snapshot.hasData)
+
+
+          {
             return ListView.builder(
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: (context,index){
                   var friendId = snapshot.data.docs[index].id;
                   var lastMsg = snapshot.data.docs[index]['last_msg'];
+
+
+
                   return FutureBuilder(
                     future: FirebaseFirestore.instance.collection('users').doc(friendId).get(),
                     builder: (context,AsyncSnapshot asyncSnapshot){

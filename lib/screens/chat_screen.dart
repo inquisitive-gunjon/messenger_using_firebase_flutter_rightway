@@ -38,7 +38,7 @@ class ChatScreen extends StatelessWidget {
                             height: 40,
                           ),
             ),
-            SizedBox(width: 5,),
+            const SizedBox(width: 5,),
             Text(friendName,style: TextStyle(fontSize: 20),)
           ],
         ),
@@ -48,7 +48,7 @@ class ChatScreen extends StatelessWidget {
         children: [
            Expanded(child: Container(
              padding: EdgeInsets.all(10),
-             decoration: BoxDecoration(
+             decoration: const BoxDecoration(
                color: Colors.white,
                borderRadius: BorderRadius.only(
                  topLeft: Radius.circular(25),
@@ -62,7 +62,7 @@ class ChatScreen extends StatelessWidget {
                builder: (context,AsyncSnapshot snapshot){
                    if(snapshot.hasData){
                      if(snapshot.data.docs.length < 1){
-                       return Center(
+                       return const Center(
                          child: Text("Say Hi"),
                        );
                      }
@@ -75,7 +75,7 @@ class ChatScreen extends StatelessWidget {
                           return SingleMessage(message: snapshot.data.docs[index]['message'], isMe: isMe);
                        });
                    }
-                   return Center(
+                   return const Center(
                      child: CircularProgressIndicator()
                    );
                }),
