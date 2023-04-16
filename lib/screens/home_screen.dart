@@ -67,56 +67,55 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       body: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('users').doc(widget.user.uid).collection('messages').snapshots(),
-        builder: (context,AsyncSnapshot snapshot){
-          if(snapshot.hasData)
-
-
-          {
-            return ListView.builder(
-                itemCount: snapshot.data.docs.length,
-                itemBuilder: (context,index){
-                  var friendId = snapshot.data.docs[index].id;
-                  var lastMsg = snapshot.data.docs[index]['last_msg'];
-
-
-
-                  return FutureBuilder(
-                    future: FirebaseFirestore.instance.collection('users').doc(friendId).get(),
-                    builder: (context,AsyncSnapshot asyncSnapshot){
-                      if(asyncSnapshot.hasData){
-                        var friend = asyncSnapshot.data;
-                        return ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(80),
-                            child: CachedNetworkImage(
-                              imageUrl:friend['image'],
-                              placeholder: (conteext,url)=>CircularProgressIndicator(),
-                              errorWidget: (context,url,error)=>Icon(Icons.error,),
-                              height: 50,
+          stream: FirebaseFirestore.instance.collection('users').doc(widget.user.uid).collection('messages').snapshots(),
+          builder: (context,AsyncSnapshot snapshot){
+            if(snapshot.hasData){
+              if(snapshot.data.docs.length < 1){
+                return const Center(
+                  child: Text("No Chats Available !"),
+                );
+              }
+              return ListView.builder(
+                  itemCount: snapshot.data.docs.length,
+                  itemBuilder: (context,index){
+                    var friendId = snapshot.data.docs[index].id;
+                    var lastMsg = snapshot.data.docs[index]['last_msg'];
+                    return FutureBuilder(
+                      future: FirebaseFirestore.instance.collection('users').doc(friendId).get(),
+                      builder: (context,AsyncSnapshot asyncSnapshot){
+                        if(asyncSnapshot.hasData){
+                          var friend = asyncSnapshot.data;
+                          return ListTile(
+                            leading: ClipRRect(
+                              borderRadius: BorderRadius.circular(80),
+                              child: CachedNetworkImage(
+                                imageUrl:friend['image'],
+                                placeholder: (conteext,url)=>CircularProgressIndicator(),
+                                errorWidget: (context,url,error)=>Icon(Icons.error,),
+                                height: 50,
+                              ),
                             ),
-                          ),
-                          title: Text(friend['name']),
-                          subtitle: Container(
-                            child: Text("$lastMsg",style: TextStyle(color: Colors.grey),overflow: TextOverflow.ellipsis,),
-                          ),
-                          onTap: (){
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatScreen(
-                                currentUser: widget.user,
-                                friendId: friend['uid'],
-                                friendName: friend['name'],
-                                friendImage: friend['image'])));
-                          },
-                        );
-                      }
-                      return LinearProgressIndicator();
-                    },
+                            title: Text(friend['name']),
+                            subtitle: Container(
+                              child: Text("$lastMsg",style: TextStyle(color: Colors.grey),overflow: TextOverflow.ellipsis,),
+                            ),
+                            onTap: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>ChatScreen(
+                                  currentUser: widget.user,
+                                  friendId: friend['uid'],
+                                  friendName: friend['name'],
+                                  friendImage: friend['image'])));
+                            },
+                          );
+                        }
+                        return LinearProgressIndicator();
+                      },
 
-                  );
-                });
-          }
-          return Center(child: CircularProgressIndicator(),);
-        }),
+                    );
+                  });
+            }
+            return Center(child: CircularProgressIndicator(),);
+          }),
 
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.search),

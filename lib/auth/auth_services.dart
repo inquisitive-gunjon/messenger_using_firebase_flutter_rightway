@@ -2,6 +2,7 @@
 
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:simple_chatapp/models/user_model.dart';
 
 class AuthServices {
 
@@ -20,6 +21,22 @@ class AuthServices {
   }
   static Future<void> logOut(){
     return _auth.signOut();
+  }
+
+
+
+  /// .........new method implement..........
+
+  static Future<UserModel?> signUpWithEmail(String email, String password,String name,String imageLink) async {
+    UserCredential result = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    return UserModel(
+        email: email,
+        name: name,
+        image: imageLink,
+        uid: result.user!.uid);
   }
 
 

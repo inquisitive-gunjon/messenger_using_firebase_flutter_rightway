@@ -1,22 +1,24 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';                 
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:provider/provider.dart';
 import 'package:simple_chatapp/screens/chat_screen.dart';
+import 'package:simple_chatapp/screens/home_screen.dart';
 import 'package:simple_chatapp/screens/registration_screen.dart';
-
 import '../auth/auth_services.dart';
 import '../main.dart';
 import '../models/user_model.dart';
-import '../providers/user_provider.dart';
 import '../reusable_widget/reusable_appbtn_style.dart';
 import '../reusable_widget/reusable_appinput_decoration.dart';
+import 'lanucher_screen.dart';
 
 
 
 class AuthScreen extends StatefulWidget {
+
+ /* UserModel user;
+  AuthScreen(this.user);*/
 
 
   @override
@@ -31,6 +33,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
   GoogleSignIn googleSignIn = GoogleSignIn();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+
+
 
   Future signInFunction()async{
     GoogleSignInAccount? googleUser = await googleSignIn.signIn();
@@ -50,7 +55,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if(userExist.exists){
       print("User Already Exists in Database");
     }
-    //jodi notun user thake ai document golo niye firebase store a chole jabe
+    //jodi na thake  notun user thake ai document golo niye firebase store a chole jabe
     else{
        await firestore.collection('users').doc(userCredential.user!.uid).set({
       'email':userCredential.user!.email,
@@ -74,8 +79,9 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _imageController = TextEditingController();
-  bool _obscureText = true;
+
   String _errMsg = '';
+
   bool isLogin = true;
   Timestamp? Datetime;
 
@@ -144,6 +150,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       isLogin = true;
                       _loginUser();
 
+
                     },
                     child: Text('Login',style: TextStyle(fontSize: 20),)),
               ),
@@ -156,7 +163,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   TextButton(
                       onPressed: (){
                          isLogin = false;
-                        // _loginUser();
+                         Navigator.push(context, MaterialPageRoute(builder: (context)=>RegistrationScreen()));
+
 
                       },
                       child: Text('Register',style: TextStyle(fontSize: 18),)),
@@ -184,44 +192,18 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  void _loginUser() async {
 
+  void _loginUser() async{
     if(_formkey.currentState!.validate()){
-      //er dara bujasse jodi empty na thake,user kiso type krse kina
       try{
         User? user;
-        //er dara bujasse user login button a press krse
-        if(isLogin){
-          //login krok or regester korok user er modde kiso ekta akhon dokbe
-          user = await  AuthServices.loginUser(_emailContoller.text, _passwordController.text);
-        }
-        else{
-          user = await AuthServices.registerUser(_emailContoller.text, _passwordController.text);
-
-        }
-        // user er modde akhon kiso na kiso dokse, tobe jawar age user er information golo niye database a save kore rakhbo
-        if(user != null) {
-          //todo create user and insert to db
-          if(!isLogin) {
-            final userModel = UserModel(
-                email: user.email!,
-                 uid: user.uid,
-            );
-            Provider.of<UserProvider>(context, listen: false)
-                .addUser(userModel).then((value) {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=> MyApp()));
-            });
-          }
-        }
-
-      } on FirebaseAuthException catch (error) {
-        setState(() {
-          _errMsg = error.message!;
-        });
+        UserModel userModel;
+        user = await AuthServices.loginUser(_emailContoller.text, _passwordController.text);
+         Navigator.push(context, MaterialPageRoute(builder: (context)=>LauncherPage()));
+      } on FirebaseAuthException catch(error){
+        _errMsg = error.message!;
       }
-
     }
-
 
   }
 

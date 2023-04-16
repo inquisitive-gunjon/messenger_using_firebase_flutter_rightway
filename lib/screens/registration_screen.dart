@@ -3,13 +3,16 @@
 
 
 
-/*import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:simple_chatapp/models/user_model.dart';
 import 'package:simple_chatapp/reusable_widget/reusable_appinput_decoration.dart';
+import 'package:simple_chatapp/screens/login_screen.dart';
 
 import '../auth/auth_services.dart';
+import '../providers/user_provider.dart';
 import '../reusable_widget/reusable_appbtn_style.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -40,11 +43,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registration Screen'),) ,
+      appBar: AppBar(title: Text('Registration Screen'),),
       body: Form(
         key: _formkey,
         child: Center(
@@ -58,8 +60,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 controller: _emailContoller,
                 keyboardType: TextInputType.emailAddress,
                 decoration: reusableAppInputDecoration('Email Address'),
-                validator: (value){
-                  if(value==null || value.isEmpty){
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
                     return 'This filed must not be empty';
                   }
                   return null;
@@ -72,8 +74,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: reusableAppInputDecoration('name'),
-                validator: (value){
-                  if(value==null || value.isEmpty){
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
                     return 'This filed must not be empty';
                   }
                   return null;
@@ -90,8 +92,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 controller: _imageController,
                 decoration: reusableAppInputDecoration('Image link'),
-                validator: (value){
-                  if(value==null || value.isEmpty){
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
                     return 'This filed must not be empty';
                   }
                   return null;
@@ -106,10 +108,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   suffixIcon: IconButton(
-                    icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility),
+                    icon: Icon(
+                        _obscureText ? Icons.visibility_off : Icons.visibility),
                     onPressed: () {
                       setState(() {
-                        _obscureText = !_obscureText; //true hole visibilityt off thakbe and click korle on hobe toggle hoye jabe
+                        _obscureText =
+                        !_obscureText; //true hole visibilityt off thakbe and click korle on hobe toggle hoye jabe
                       });
                     },
                   ),
@@ -118,7 +122,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
                 ),
                 validator: (value) {
-                  if(value == null || value.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return 'This filed must not be empty';
                   }
                   return null;
@@ -131,13 +135,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                     style: appButtonStyle(),
-                    onPressed:() async{
-                        _registrationUser();
+                    onPressed: () async {
+                      signUp();
                     },
-                    child: Text('Sign Up',style: TextStyle(fontSize: 20),)),
+                    child: Text('Sign Up', style: TextStyle(fontSize: 20),)),
               ),
-
-
 
 
             ],
@@ -149,12 +151,39 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
 
     );
-
-
-
-
-
   }
 
+  signUp() async {
+    if (_formkey.currentState!.validate()) {
+      User?user;
+      try {
+        user = await AuthServices.registerUser(
+            _emailContoller.text,
+            _passwordController.text
 
-}*/
+
+        );
+        if(user!=null){
+          final userModel = UserModel(
+              email: _emailContoller.text,
+              uid: user.uid,
+              name: _nameController.text,
+              image: _imageController.text
+          );
+          Provider.of<UserProvider>(context, listen: false)
+              .addUser(userModel).then((value) {
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> const RegistrationScreen()));
+          });
+
+        }
+
+
+      } on FirebaseAuthException catch (error) {
+        setState(() {
+          _errMsg = error.message!;
+        });
+
+      }
+    }
+  }
+}
