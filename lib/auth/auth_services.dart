@@ -6,6 +6,8 @@ import 'package:simple_chatapp/models/user_model.dart';
 
 class AuthServices {
 
+  String ? name;
+
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static User? get currentUser => _auth.currentUser;
 
@@ -41,3 +43,4 @@ class AuthServices {
 
 
 }
+
